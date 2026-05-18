@@ -208,6 +208,92 @@ const productRepository = {
   getAllBrands: async () => {
     const [rows] = await db.execute('SELECT DISTINCT brand FROM products ORDER BY brand')
     return rows.map((r) => normalizeText(r.brand))
+  },
+
+  // ── CHỨC NĂNG 1: Lấy sản phẩm theo danh mục (Lazy loading / Infinite scroll) ──
+  getByCategory: async (categorySlug, page = 1, limit = 8, sortBy = 'sold_desc') => {
+    const safePage = toPositiveInt(page, 1)
+    const safeLimit = toPositiveInt(limit, 8)
+    const offset = (safePage - 1) * safeLimit
+
+    // Xác định ORDER BY
+    let orderClause = 'ORDER BY p.sold DESC, p.created_at DESC'
+    if (sortBy === 'newest')     orderClause = 'ORDER BY p.created_at DESC'
+    if (sortBy === 'price_asc')  orderClause = 'ORDER BY (p.price - (p.price * p.discount_percent / 100)) ASC'
+    if (sortBy === 'price_desc') orderClause = 'ORDER BY (p.price - (p.price * p.discount_percent / 100)) DESC'
+    if (sortBy === 'rating_desc') orderClause = 'ORDER BY p.rating DESC'
+    if (sortBy === 'sold_desc')  orderClause = 'ORDER BY p.sold DESC'
+
+    // Lấy thông tin danh mục
+    const [catRows] = await db.execute(
+      'SELECT * FROM categories WHERE slug = ?',
+      [categorySlug]
+    )
+    if (!catRows[0]) return null
+    const category = normalizeCategory(catRows[0])
+
+    // Đếm tổng sản phẩm trong danh mục
+    const [countRows] = await db.execute(
+      'SELECT COUNT(*) as total FROM products WHERE category_id = ?',
+      [category.id]
+    )
+    const total = countRows[0].total
+
+    // Lấy sản phẩm phân trang
+    const [rows] = await db.execute(`
+      SELECT p.*, c.name AS category_name, c.slug AS category_slug,
+        (SELECT image_url FROM product_images WHERE product_id = p.id AND is_primary = 1 LIMIT 1) AS primary_image
+      FROM products p
+      JOIN categories c ON p.category_id = c.id
+      WHERE p.category_id = ?
+      ${orderClause}
+      LIMIT ${safeLimit} OFFSET ${offset}
+    `, [category.id])
+
+    return {
+      category,
+      data: rows.map(normalizeProduct),
+      pagination: {
+        page: safePage,
+        limit: safeLimit,
+        total,
+        totalPages: Math.ceil(total / safeLimit),
+        hasMore: safePage * safeLimit < total
+      }
+    }
+  },
+
+  // ── CHỨC NĂNG 2a: Top 10 bán chạy nhất (sắp xếp theo sold DESC) ──
+  getTopBestsellers: async (limit = 10) => {
+    const safeLimit = toPositiveInt(limit, 10)
+    const [rows] = await db.execute(`
+      SELECT p.*, c.name AS category_name, c.slug AS category_slug,
+        (SELECT image_url FROM product_images WHERE product_id = p.id AND is_primary = 1 LIMIT 1) AS primary_image
+      FROM products p
+      JOIN categories c ON p.category_id = c.id
+      ORDER BY p.sold DESC
+      LIMIT ${safeLimit}
+    `)
+    return rows.map(normalizeProduct)
+  },
+
+  // ── CHỨC NĂNG 2b: Top sản phẩm xem nhiều nhất (sắp xếp theo views DESC) ──
+  getTopViewed: async (limit = 10) => {
+    const safeLimit = toPositiveInt(limit, 10)
+    const [rows] = await db.execute(`
+      SELECT p.*, c.name AS category_name, c.slug AS category_slug,
+        (SELECT image_url FROM product_images WHERE product_id = p.id AND is_primary = 1 LIMIT 1) AS primary_image
+      FROM products p
+      JOIN categories c ON p.category_id = c.id
+      ORDER BY p.views DESC
+      LIMIT ${safeLimit}
+    `)
+    return rows.map(normalizeProduct)
+  },
+
+  // ── Tăng lượt xem khi user mở trang chi tiết sản phẩm ──
+  incrementViews: async (productId) => {
+    await db.execute('UPDATE products SET views = views + 1 WHERE id = ?', [productId])
   }
 }
 

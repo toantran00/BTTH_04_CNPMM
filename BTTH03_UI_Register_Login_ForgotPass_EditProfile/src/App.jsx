@@ -7,6 +7,8 @@ import Home from '~/pages/Home'
 import HomePage from '~/pages/HomePage'
 import ShopPage from '~/pages/ShopPage'
 import ProductDetailPage from '~/pages/ProductDetailPage'
+import CategoryPage from '~/pages/CategoryPage'
+import TopProductsPage from '~/pages/TopProductsPage'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import ForgotPassword from '~/pages/ForgotPassword'
@@ -50,6 +52,20 @@ function App() {
         <Route path="/product/:slug" element={
           <ProtectedRoute allowedRoles={['user', 'admin']}>
             <ProductDetailPage />
+          </ProtectedRoute>
+        } />
+
+        {/* CHỨC NĂNG 1: Sản phẩm theo danh mục - Lazy loading */}
+        <Route path="/category/:slug" element={
+          <ProtectedRoute allowedRoles={['user', 'admin']}>
+            <CategoryPage />
+          </ProtectedRoute>
+        } />
+
+        {/* CHỨC NĂNG 2: Top 10 bán chạy + xem nhiều (horizontal pagination) */}
+        <Route path="/top" element={
+          <ProtectedRoute allowedRoles={['user', 'admin']}>
+            <TopProductsPage />
           </ProtectedRoute>
         } />
 

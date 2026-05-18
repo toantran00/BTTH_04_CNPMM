@@ -90,6 +90,28 @@ const getBrandsAPI = async () => {
   return response.data
 }
 
+/**
+ * CHỨC NĂNG 2: Lấy top 10 bán chạy + xem nhiều nhất
+ * @param {number} limit - số sản phẩm (mặc định 10)
+ */
+const getTopProductsAPI = async (limit = 10) => {
+  const response = await authorizedAxiosInstance.get(`${API_ROOT}/api/products/top?limit=${limit}`)
+  return response.data
+}
+
+/**
+ * CHỨC NĂNG 1: Lấy sản phẩm theo danh mục (Lazy loading)
+ * @param {string} slug - slug danh mục
+ * @param {number} page - trang hiện tại
+ * @param {number} limit - số sản phẩm mỗi trang
+ */
+const getProductsByCategoryAPI = async (slug, page = 1, limit = 8, sortBy = 'sold_desc') => {
+  const response = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/products/category/${slug}?page=${page}&limit=${limit}&sortBy=${sortBy}`
+  )
+  return response.data
+}
+
 export const authAPI = {
   registerUserAPI,
   verifyOTPAPI,
@@ -104,5 +126,7 @@ export const productAPI = {
   getProductDetailAPI,
   searchProductsAPI,
   getCategoriesAPI,
-  getBrandsAPI
+  getBrandsAPI,
+  getTopProductsAPI,
+  getProductsByCategoryAPI
 }

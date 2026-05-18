@@ -111,6 +111,9 @@ const Navbar = ({ user, onLogout, onNavigate }) => {
           <div className="hidden md:flex items-center gap-6">
             <button onClick={() => onNavigate('/home')} className="text-sm font-semibold text-gray-700 hover:text-indigo-600 transition">Trang chủ</button>
             <button onClick={() => onNavigate('/shop')} className="text-sm font-semibold text-gray-700 hover:text-indigo-600 transition">Cửa hàng</button>
+            <button onClick={() => onNavigate('/top')} className="text-sm font-semibold text-amber-600 hover:text-amber-700 transition flex items-center gap-1">
+              🏆 Bảng xếp hạng
+            </button>
             <button onClick={() => onNavigate('/profile')} className="text-sm font-semibold text-gray-700 hover:text-indigo-600 transition">Tài khoản</button>
           </div>
 
@@ -219,20 +222,27 @@ const PromoBanners = () => (
 // ─── Category Pills ──────────────────────────────────────────────────────────
 const CategoryPills = ({ categories, onCategoryClick }) => (
   <div>
-    <h2 className="text-xl font-extrabold text-gray-800 mb-4">📂 Danh mục sản phẩm</h2>
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-xl font-extrabold text-gray-800">📂 Danh mục sản phẩm</h2>
+      <span className="text-xs text-gray-400">Nhấp để xem toàn bộ danh mục</span>
+    </div>
     <div className="flex flex-wrap gap-3">
       {categories.map((cat) => (
         <button
           key={cat.id}
-          onClick={() => onCategoryClick(cat.id)}
+          onClick={() => onCategoryClick(cat.slug)}
           className="group flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-gray-200 rounded-xl hover:border-indigo-400 hover:bg-indigo-50 transition-all font-semibold text-gray-700 hover:text-indigo-700 shadow-sm"
         >
           <span>{cat.name}</span>
+          <svg className="w-4 h-4 text-gray-300 group-hover:text-indigo-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       ))}
     </div>
   </div>
 )
+
 
 // ─── Product Grid ────────────────────────────────────────────────────────────
 const ProductGrid = ({ products, onProductClick }) => (
@@ -291,7 +301,7 @@ const HomePage = () => {
 
   const handleProductClick = (slug) => navigate(`/product/${slug}`)
   const handleShopClick = () => navigate('/shop')
-  const handleCategoryClick = (catId) => navigate(`/shop?categoryId=${catId}`)
+  const handleCategoryClick = (categorySlug) => navigate(`/category/${categorySlug}`)
 
   return (
     <div className="min-h-screen bg-gray-50">
