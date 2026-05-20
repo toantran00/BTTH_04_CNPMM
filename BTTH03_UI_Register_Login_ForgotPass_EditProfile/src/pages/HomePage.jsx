@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { clearUser } from '~/redux/userSlice'
-import { productAPI } from '~/apis'
+import { productAPI, cartAPI } from '~/apis'
 import { toast } from 'react-toastify'
 
 // Utility
@@ -93,7 +93,7 @@ const SectionHeader = ({ icon, title, subtitle, badge }) => (
 )
 
 // ─── Navbar ─────────────────────────────────────────────────────────────────
-const Navbar = ({ user, onLogout, onNavigate }) => {
+const Navbar = ({ user, onLogout, onNavigate, cartCount }) => {
   const [menuOpen, setMenuOpen] = useState(false)
   return (
     <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
@@ -114,11 +114,24 @@ const Navbar = ({ user, onLogout, onNavigate }) => {
             <button onClick={() => onNavigate('/top')} className="text-sm font-semibold text-amber-600 hover:text-amber-700 transition flex items-center gap-1">
               🏆 Bảng xếp hạng
             </button>
+            <button onClick={() => onNavigate('/orders')} className="text-sm font-semibold text-gray-700 hover:text-indigo-600 transition">📋 Đơn hàng</button>
             <button onClick={() => onNavigate('/profile')} className="text-sm font-semibold text-gray-700 hover:text-indigo-600 transition">Tài khoản</button>
           </div>
 
-          {/* User */}
+          {/* User + Cart */}
           <div className="flex items-center gap-3">
+            {/* Cart icon */}
+            <button onClick={() => onNavigate('/cart')}
+              className="relative w-9 h-9 bg-indigo-50 hover:bg-indigo-100 rounded-xl flex items-center justify-center transition">
+              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
+                  {cartCount > 9 ? '9+' : cartCount}
+                </span>
+              )}
+            </button>
             <div className="hidden sm:flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
                 {user?.username?.charAt(0).toUpperCase()}
@@ -276,6 +289,7 @@ const HomePage = () => {
 
   const [homeData, setHomeData] = useState({ featured: [], newest: [], bestsellers: [], categories: [] })
   const [loading, setLoading] = useState(true)
+  const [cartCount, setCartCount] = useState(0)
 
   useEffect(() => {
     const fetchHome = async () => {
@@ -290,7 +304,14 @@ const HomePage = () => {
         setLoading(false)
       }
     }
+    const fetchCartCount = async () => {
+      try {
+        const res = await cartAPI.getCartAPI()
+        if (res.status === 'success') setCartCount(res.data.itemCount)
+      } catch {}
+    }
     fetchHome()
+    fetchCartCount()
   }, [])
 
   const handleLogout = () => {
@@ -305,7 +326,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar user={userInfo} onLogout={handleLogout} onNavigate={navigate} />
+      <Navbar user={userInfo} onLogout={handleLogout} onNavigate={navigate} cartCount={cartCount} />
 
       <main className="max-w-7xl mx-auto px-4 pb-12 space-y-10">
         {/* Hero */}

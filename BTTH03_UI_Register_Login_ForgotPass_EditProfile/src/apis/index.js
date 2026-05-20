@@ -112,6 +112,46 @@ const getProductsByCategoryAPI = async (slug, page = 1, limit = 8, sortBy = 'sol
   return response.data
 }
 
+// ==================== CART APIs ====================
+const getCartAPI = async () => {
+  const response = await authorizedAxiosInstance.get(`${API_ROOT}/api/cart`)
+  return response.data
+}
+const addToCartAPI = async (productId, quantity = 1, size = null) => {
+  const response = await authorizedAxiosInstance.post(`${API_ROOT}/api/cart/add`, { productId, quantity, size })
+  return response.data
+}
+const updateCartItemAPI = async (itemId, quantity) => {
+  const response = await authorizedAxiosInstance.put(`${API_ROOT}/api/cart/update/${itemId}`, { quantity })
+  return response.data
+}
+const removeCartItemAPI = async (itemId) => {
+  const response = await authorizedAxiosInstance.delete(`${API_ROOT}/api/cart/remove/${itemId}`)
+  return response.data
+}
+const clearCartAPI = async () => {
+  const response = await authorizedAxiosInstance.delete(`${API_ROOT}/api/cart/clear`)
+  return response.data
+}
+
+// ==================== ORDER APIs ====================
+const createOrderAPI = async (orderData) => {
+  const response = await authorizedAxiosInstance.post(`${API_ROOT}/api/orders`, orderData)
+  return response.data
+}
+const getMyOrdersAPI = async () => {
+  const response = await authorizedAxiosInstance.get(`${API_ROOT}/api/orders`)
+  return response.data
+}
+const getOrderDetailAPI = async (orderId) => {
+  const response = await authorizedAxiosInstance.get(`${API_ROOT}/api/orders/${orderId}`)
+  return response.data
+}
+const cancelOrderAPI = async (orderId, reason) => {
+  const response = await authorizedAxiosInstance.put(`${API_ROOT}/api/orders/${orderId}/cancel`, { reason })
+  return response.data
+}
+
 export const authAPI = {
   registerUserAPI,
   verifyOTPAPI,
@@ -129,4 +169,19 @@ export const productAPI = {
   getBrandsAPI,
   getTopProductsAPI,
   getProductsByCategoryAPI
+}
+
+export const cartAPI = {
+  getCartAPI,
+  addToCartAPI,
+  updateCartItemAPI,
+  removeCartItemAPI,
+  clearCartAPI
+}
+
+export const orderAPI = {
+  createOrderAPI,
+  getMyOrdersAPI,
+  getOrderDetailAPI,
+  cancelOrderAPI
 }

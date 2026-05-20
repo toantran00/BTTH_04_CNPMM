@@ -9,6 +9,9 @@ import ShopPage from '~/pages/ShopPage'
 import ProductDetailPage from '~/pages/ProductDetailPage'
 import CategoryPage from '~/pages/CategoryPage'
 import TopProductsPage from '~/pages/TopProductsPage'
+import CartPage from '~/pages/CartPage'
+import CheckoutPage from '~/pages/CheckoutPage'
+import OrdersPage from '~/pages/OrdersPage'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import ForgotPassword from '~/pages/ForgotPassword'
@@ -34,56 +37,24 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Route trang chủ shop (sau khi đăng nhập thành viên) */}
-        <Route path="/home" element={
-          <ProtectedRoute allowedRoles={['user', 'admin']}>
-            <HomePage />
-          </ProtectedRoute>
-        } />
+        <Route path="/home" element={<ProtectedRoute allowedRoles={['user', 'admin']}><HomePage /></ProtectedRoute>} />
+        <Route path="/shop" element={<ProtectedRoute allowedRoles={['user', 'admin']}><ShopPage /></ProtectedRoute>} />
+        <Route path="/product/:slug" element={<ProtectedRoute allowedRoles={['user', 'admin']}><ProductDetailPage /></ProtectedRoute>} />
+        <Route path="/category/:slug" element={<ProtectedRoute allowedRoles={['user', 'admin']}><CategoryPage /></ProtectedRoute>} />
+        <Route path="/top" element={<ProtectedRoute allowedRoles={['user', 'admin']}><TopProductsPage /></ProtectedRoute>} />
 
-        {/* Route cửa hàng + tìm kiếm lọc */}
-        <Route path="/shop" element={
-          <ProtectedRoute allowedRoles={['user', 'admin']}>
-            <ShopPage />
-          </ProtectedRoute>
-        } />
+        {/* Giỏ hàng */}
+        <Route path="/cart" element={<ProtectedRoute allowedRoles={['user', 'admin']}><CartPage /></ProtectedRoute>} />
 
-        {/* Route chi tiết sản phẩm */}
-        <Route path="/product/:slug" element={
-          <ProtectedRoute allowedRoles={['user', 'admin']}>
-            <ProductDetailPage />
-          </ProtectedRoute>
-        } />
+        {/* Thanh toán */}
+        <Route path="/checkout" element={<ProtectedRoute allowedRoles={['user', 'admin']}><CheckoutPage /></ProtectedRoute>} />
 
-        {/* CHỨC NĂNG 1: Sản phẩm theo danh mục - Lazy loading */}
-        <Route path="/category/:slug" element={
-          <ProtectedRoute allowedRoles={['user', 'admin']}>
-            <CategoryPage />
-          </ProtectedRoute>
-        } />
+        {/* Đơn hàng — list và detail */}
+        <Route path="/orders" element={<ProtectedRoute allowedRoles={['user', 'admin']}><OrdersPage /></ProtectedRoute>} />
+        <Route path="/orders/:orderId" element={<ProtectedRoute allowedRoles={['user', 'admin']}><OrdersPage /></ProtectedRoute>} />
 
-        {/* CHỨC NĂNG 2: Top 10 bán chạy + xem nhiều (horizontal pagination) */}
-        <Route path="/top" element={
-          <ProtectedRoute allowedRoles={['user', 'admin']}>
-            <TopProductsPage />
-          </ProtectedRoute>
-        } />
-
-        {/* Route trang profile (giữ nguyên từ bài cũ) */}
-        <Route path="/profile" element={
-          <ProtectedRoute allowedRoles={['user', 'admin']}>
-            <Home />
-          </ProtectedRoute>
-        } />
-
-        {/* Route CHỈ dành cho Admin */}
-        <Route path="/admin/dashboard" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        } />
-
-        {/* Mặc định quay về login nếu không khớp route nào */}
+        <Route path="/profile" element={<ProtectedRoute allowedRoles={['user', 'admin']}><Home /></ProtectedRoute>} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </>
